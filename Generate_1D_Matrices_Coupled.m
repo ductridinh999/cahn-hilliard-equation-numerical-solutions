@@ -14,7 +14,7 @@ function [P, Q, S, D2, D1] = Generate_1D_Matrices_Coupled(N, dt)
 
     D2 = D2 / h^2;
     
-    % Gradient (Central Difference) ---
+    % Gradient (Central Difference) 
     % D1 u = (u_{i+1} - u_{i-1}) / (2h)
     D1 = spdiags([-e, e], [-1,1], N+1, N+1);
     
@@ -26,7 +26,6 @@ function [P, Q, S, D2, D1] = Generate_1D_Matrices_Coupled(N, dt)
     D1(N+1,N) = 0;
     D1 = D1 / (2*h);
     
-    % --- Block Matrices for CH Solver ---
     P = speye(N+1);
     Q = -dt * D2; 
     S = -speye(N+1);

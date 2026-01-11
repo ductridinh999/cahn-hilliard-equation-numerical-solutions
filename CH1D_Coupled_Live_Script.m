@@ -2,7 +2,7 @@ clear all; close all; clc;
 
 % Parameters
 N = 100;        % Grid points
-T = 3000;       % Time steps
+T = 5000;       % Time steps
 ep = 0.01;      % Interface width
 dt = 1e-5;      % Time step
 seed = 42;      % Random seed

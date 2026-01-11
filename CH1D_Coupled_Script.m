@@ -1,37 +1,45 @@
 clear all; close all; clc;
 
-% Parameters
-N = 100;        % Grid points
-T = 3000;       % Time steps
-ep = 0.01;      % Interface width
-dt = 1e-5;      % Time step
-seed = 42;      % Random seed
-k = 1;          % Random initial condition, 2 for smooth cosine
+N = 128;        
+T = 500;        % Total time steps
+ep = 0.01;      
+dt = 1e-4;      
+seed = 42;      
+k = 2;          % Random noise
 
-% Run  Solver
+disp('Running Coupled Simulation...');
 [cvecs, u_vecs, time] = CH1D_Coupled(N, T, ep, dt, seed, k);
+disp('Done.');
 
-figure('Name', 'Coupled Evolution', 'Color', 'w');
-% Subplot 1: Concentration Evolution
-subplot(2,1,1);
-hold on;
-plot(linspace(0,1,N+1), cvecs(:,1), 'k--', 'LineWidth', 1, 'DisplayName', 't=0');
-% plot(linspace(0,1,N+1), cvecs(:,round(T/2)), 'b', 'LineWidth', 1.5, 'DisplayName', ['t=',num2str(round(T/2))]);
-plot(linspace(0,1,N+1), cvecs(:,end), 'r', 'LineWidth', 2, 'DisplayName', ['t=',num2str(T)]);
-ylim([-1.1, 1.1]);
-ylabel('Concentration c');
-legend; title('Phase Separation');
-grid on;
+indices = [1, 50, 200, T];
+stage_names = {'Initial', 'Spinodal Decomposition', 'Coarsening', 'Final State'};
 
-% Subplot 2: Displacement / Strain Field at final time
-subplot(2,1,2);
-x = linspace(0,1,N+1);
-yyaxis left
-plot(x, u_vecs(:,end), 'g-', 'LineWidth', 2);
-ylabel('Displacement u');
-yyaxis right
-u_prime = gradient(u_vecs(:,end)) * N; 
-plot(x, u_prime, 'm:', 'LineWidth', 1.5);
-ylabel('Strain u''');
-title('Mechanical State (Final Time)');
-grid on;
+figure('Name', 'Coupled Evolution Stages (T=500)', 'Color', 'w', 'Position', [100, 50, 700, 1000]);
+
+x = linspace(0, 1, N+1);
+
+for i = 1:4
+    idx = indices(i);
+    
+    subplot(4, 1, i);
+    
+    yyaxis left
+    plot(x, cvecs(:, idx), 'b-', 'LineWidth', 2);
+    ylabel('Conc. c', 'Color', 'b');
+    set(gca, 'YColor', 'b');
+    ylim([-1.1, 1.1]);
+    
+    yyaxis right
+    % Calculate strain (gradient of displacement)
+    u_prime = gradient(u_vecs(:, idx)) * N; 
+    plot(x, u_prime, 'r--', 'LineWidth', 1.5);
+    ylabel('Strain \epsilon', 'Color', 'r');
+    set(gca, 'YColor', 'r');
+    
+    title([stage_names{i}, ' (Step ', num2str(idx), ')']);
+    grid on;
+    
+    if i == 4
+        xlabel('Position x');
+    end
+end

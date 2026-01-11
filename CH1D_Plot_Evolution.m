@@ -11,6 +11,6 @@ fighand = figure();
         ylabel('Concentration');
         grid on;
         drawnow;
-        pause(0.05); 
+        % pause(0.01); 
     end
 end

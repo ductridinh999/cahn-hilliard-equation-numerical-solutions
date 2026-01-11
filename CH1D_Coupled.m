@@ -21,17 +21,16 @@ function [cvecs, u_vecs, t] = CH1D_Coupled(N, T, ep, dt, seed, k)
     [cvecs] = CH_initial_1D(N, T, k, seed);
     u_vecs = zeros(N+1, T);
     
-    % Get Matrices (D2=L_h, D1=D_h)
+    % Get Matrices
     [P, Q, S, D2, D1] = Generate_1D_Matrices_Coupled(N, dt);
     
-    % Constant parts)
     R_base = 2*speye(N+1) - (ep^2)*D2;
     
     tic;
     for n = 2:T
         c_old = cvecs(:,n-1);
         
-        % 1. Solve Mechanics, calculate based on c_old
+        % Solve Mechanics, calculate based on c_{n-1}
         E_vals = get_E(c_old);
         dE_dx = D1 * E_vals;
         eps_star = get_eps_star(c_old);
@@ -49,7 +48,7 @@ function [cvecs, u_vecs, t] = CH1D_Coupled(N, T, ep, dt, seed, k)
         u = K \ b_mech;
         u_vecs(:,n) = u;
         
-        % 2. Compute mu_el
+        % Compute mu_el
         u_prime = D1 * u;
         elastic_strain = u_prime - eps_star;
         dE_dc = get_dEdc(c_old);
@@ -58,9 +57,9 @@ function [cvecs, u_vecs, t] = CH1D_Coupled(N, T, ep, dt, seed, k)
         mu_el = 0.5 * dE_dc .* (elastic_strain.^2) + ...
                 E_vals .* (elastic_strain) .* (-deps_dc);
             
-        % 3. Solve the Coupled CH        
+        % Solve the Coupled CH        
         rhs_chem = (3*c_old - c_old.^3); 
-        rhs_total = rhs_chem - mu_el; % Add elastic potential 
+        rhs_total = rhs_chem - mu_el; 
         
         A = [P, Q; R_base, S];
         b = [c_old; rhs_total];
